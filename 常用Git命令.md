@@ -30,6 +30,20 @@
 
 git status 命令显示工作目录和暂存区域的状态。  它可以让您查看哪些更改已暂存，哪些尚未暂存，以及哪些文件未被 Git 跟踪。  状态输出不会向您显示有关已提交项目历史记录的任何信息。
 
+## 拉取最新代码
+
+```sh
+git pull
+git pull origin main
+```
+
+## 推送到 GitHub
+
+```sh
+git push
+git push -u origin main
+```
+
 ## 添加 GitHub 远程仓库
 
 新建仓库
