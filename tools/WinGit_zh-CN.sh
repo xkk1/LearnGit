@@ -20,25 +20,21 @@ fi
 rm -f "$TEST_FILE"
 
 # -------------------------- 语言包下载 --------------------------
-# 检测语言包是否存在
 LANG_FILE="zh_CN.po"
-if [ ! -f "$LANG_FILE" ]; then
-    echo "⬇️ 正在下载 Git 中文语言包"
-    # Git 官方源地址（GitHub原始文件） https://github.com/git/git/blob/master/po/zh_CN.po
-    # wget https://raw.githubusercontent.com/git/git/master/po/zh_CN.po -O zh_CN.po
-    # Git for Windows 官方源地址（GitHub原始文件） https://github.com/git-for-windows/git/blob/main/po/zh_CN.po
-    # 使用curl下载（更适合Windows环境）
-    curl -o zh_CN.po https://github.com/git-for-windows/git/raw/refs/heads/main/po/zh_CN.po
-    # 下载结果校验
-    if [ $? -ne 0 ] || [ ! -s "$LANG_FILE" ]; then  # -s检查文件非空
-        echo "❌ 下载失败：网络问题或文件损坏"
-        echo "    手动下载地址：https://raw.githubusercontent.com/git/git/master/po/zh_CN.po"
-        exit 1
-    fi
-    echo "✅ 语言包下载完成（$(du -h "$LANG_FILE" | awk '{print $1}')）"
-else
-    echo "ℹ️ 检测到本地已有语言包：$(ls -lh "$LANG_FILE" | awk '{print $5}')"
+echo "⬇️ 正在下载 Git 中文语言包"
+# Git 官方源地址（GitHub原始文件） https://github.com/git/git/blob/master/po/zh_CN.po
+# wget https://raw.githubusercontent.com/git/git/master/po/zh_CN.po -O zh_CN.po
+# Git for Windows 官方源地址（GitHub原始文件） https://github.com/git-for-windows/git/blob/main/po/zh_CN.po
+# 使用curl下载（更适合Windows环境）
+curl -L -o zh_CN.po https://github.com/git-for-windows/git/raw/refs/heads/main/po/zh_CN.po
+# 下载结果校验
+if [ $? -ne 0 ] || [ ! -s "$LANG_FILE" ]; then  # -s检查文件非空
+    echo "❌ 下载失败：网络问题或文件损坏"
+    echo "    手动下载地址：https://raw.githubusercontent.com/git/git/master/po/zh_CN.po"
+    exit 1
 fi
+echo "✅ 语言包下载完成（$(du -h "$LANG_FILE" | awk '{print $1}')）"
+
 
 # -------------------------- 环境检查 --------------------------
 # 检查msgfmt工具是否存在（生成mo文件必需）
