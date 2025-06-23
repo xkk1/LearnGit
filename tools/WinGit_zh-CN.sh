@@ -2,7 +2,7 @@
 # Author: xkk1
 # 描述：Git中文语言包安装脚本（需管理员权限）
 # 注意：请以Git Bash（管理员权限）运行此脚本
-# "C:\Program Files\Git\bin\bash.exe" -c WinGit_zh-CN.sh
+# "C:\Program Files\Git\bin\bash.exe" WinGit_zh-CN.sh
 
 # 参考：https://zhuanlan.zhihu.com/p/681521193
 
@@ -77,8 +77,6 @@ fi
 echo -e "\n🎉 安装完成！验证信息："
 echo "   语言包路径：$(realpath "$DEST_FILE")"
 
-# -------------------------- 清理文件 & 退出 --------------------------
+# -------------------------- 清理文件并退出 --------------------------
 rm -f git.mo "$LANG_FILE"
-read -p "按回车键继续..."
-
 exit 0
