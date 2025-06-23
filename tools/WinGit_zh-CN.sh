@@ -2,7 +2,7 @@
 # Author: xkk1
 # 描述：Git中文语言包安装脚本（需管理员权限）
 # 注意：请以Git Bash（管理员权限）运行此脚本
-# "C:\Program Files\Git\bin\bash.exe" --login -i WinGit_zh-CN.sh
+# "C:\Program Files\Git\bin\bash.exe" -c WinGit_zh-CN.sh
 
 # 参考：https://zhuanlan.zhihu.com/p/681521193
 
@@ -24,10 +24,11 @@ rm -f "$TEST_FILE"
 LANG_FILE="zh_CN.po"
 if [ ! -f "$LANG_FILE" ]; then
     echo "⬇️ 正在下载 Git 中文语言包"
-    # 官方源地址（GitHub原始文件） https://github.com/git/git/blob/master/po/zh_CN.po
+    # Git 官方源地址（GitHub原始文件） https://github.com/git/git/blob/master/po/zh_CN.po
     # wget https://raw.githubusercontent.com/git/git/master/po/zh_CN.po -O zh_CN.po
+    # Git for Windows 官方源地址（GitHub原始文件） https://github.com/git-for-windows/git/blob/main/po/zh_CN.po
     # 使用curl下载（更适合Windows环境）
-    curl -o zh_CN.po https://raw.githubusercontent.com/git/git/master/po/zh_CN.po
+    curl -o zh_CN.po https://github.com/git-for-windows/git/raw/refs/heads/main/po/zh_CN.po
     # 下载结果校验
     if [ $? -ne 0 ] || [ ! -s "$LANG_FILE" ]; then  # -s检查文件非空
         echo "❌ 下载失败：网络问题或文件损坏"
@@ -76,7 +77,8 @@ fi
 echo -e "\n🎉 安装完成！验证信息："
 echo "   语言包路径：$(realpath "$DEST_FILE")"
 
-# -------------------------- 清理文件 --------------------------
+# -------------------------- 清理文件 & 退出 --------------------------
 rm -f git.mo "$LANG_FILE"
+read -p "按回车键继续..."
 
 exit 0
