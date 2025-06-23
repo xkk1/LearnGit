@@ -6,19 +6,6 @@
 
 # 参考：https://zhuanlan.zhihu.com/p/681521193
 
-# -------------------------- 权限检查 --------------------------
-# 检测目标目录是否可写（通过临时文件测试）
-TARGET_BASE="/mingw64/share/locale/zh_CN"
-TEST_FILE="${TARGET_BASE}/langpack_test_$(date +%s).tmp"  # 唯一临时文件防冲突
-
-# 尝试创建测试文件检测写入权限
-if ! touch "$TEST_FILE" 2>/dev/null; then
-    echo "❌ 权限错误：当前用户无权限写入 ${TARGET_BASE} 目录，请以管理员身份运行"
-    exit 1
-fi
-# 清理测试文件
-rm -f "$TEST_FILE"
-
 # -------------------------- 语言包下载 --------------------------
 LANG_FILE="zh_CN.po"
 echo "⬇️ 正在下载 Git 中文语言包"
@@ -53,13 +40,14 @@ fi
 echo "✅ MO文件生成成功：$(ls -lh git.mo | awk '{print $5}')"
 
 # -------------------------- 部署到系统目录 --------------------------
+TARGET_BASE="/mingw64/share/locale/zh_CN"
 DEST_DIR="${TARGET_BASE}/LC_MESSAGES"
 DEST_FILE="${DEST_DIR}/git.mo"
 
 echo "📂 正在部署到系统目录：${DEST_DIR}"
 # 创建多级目录（-p自动创建缺失父目录）
 if ! mkdir -vp "$DEST_DIR"; then
-    echo "❌ 目录创建失败：请检查${DEST_DIR}路径是否存在"
+    echo "❌ 目录创建失败：请检查是否有权限或${DEST_DIR}路径是否存在"
     exit 1
 fi
 
