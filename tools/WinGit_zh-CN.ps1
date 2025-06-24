@@ -7,37 +7,39 @@
     3. 以管理员身份使用 Git Bash 执行该脚本
 #>
 
+Write-Host "🔧 小喾苦 Git for Windows 语言包自动安装 PowerShell 脚本" -ForegroundColor Green
+
 # 检测是否以管理员身份运行
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "❌ 错误：此脚本需要以管理员权限运行！" -ForegroundColor Red
-    Write-Host "请右键点击 PowerShell 图标，选择 '以管理员身份运行' 后重试。" -ForegroundColor Yellow
+    Write-Host "🖱️ 请右键点击 PowerShell 图标，选择 '以管理员身份运行' 后重试。" -ForegroundColor Yellow
     exit 1
 }
 
 # 1. 检查 Git 是否在环境变量 PATH 中
 try {
-    $gitPath = (Get-Command git.exe -ErrorAction Stop).Source
-    $gitDir = Split-Path -Path $gitPath -Parent
-    Write-Host "检测到 Git for Windows 安装路径: $gitDir" -ForegroundColor Green
+    $gitExePath = (Get-Command git.exe -ErrorAction Stop).Source
+    $gitExeDir = Split-Path -Path $gitExePath -Parent
+    # 从 git.exe 路径推导 Git for Windows 路径
+    $gitDir = Split-Path -Path $gitExeDir -Parent
+    Write-Host "📁 检测到 Git for Windows 安装路径: $gitDir" -ForegroundColor Green
 } catch {
-    Write-Host "错误: 未检测到 Git for Windows 安装或 git.exe 不在环境变量 PATH 中" -ForegroundColor Red
-    Write-Host "请先安装 Git 并确保 git.exe 在系统 PATH 环境变量中" -ForegroundColor Yellow
+    Write-Host "❌ 错误: 未检测到 Git for Windows 安装或 git.exe 不在环境变量 PATH 中" -ForegroundColor Red
+    Write-Host "📦 请先安装 Git for Windows 并确保 git.exe 在系统 PATH 环境变量中" -ForegroundColor Yellow
     exit 1
 }
 
 try {
-    # 从 git.exe 路径推导 bash.exe 路径
-    $parentDir = Split-Path -Path $gitDir -Parent
-    $gitBashPath = Join-Path -Path $parentDir -ChildPath "bin\bash.exe"
+    $gitBashPath = Join-Path -Path $gitDir -ChildPath "bin\bash.exe"
     
     if (-not (Test-Path $gitBashPath)) {
-        throw "在 Git 目录中未找到 bash.exe"
+        throw "❌ 在 Git 目录中未找到 bash.exe"
     }
     
-    Write-Host "Git Bash 路径: $gitBashPath" -ForegroundColor Cyan
+    Write-Host "📄 Git Bash 路径: $gitBashPath" -ForegroundColor Cyan
 } catch {
-    Write-Host "错误: 无法找到 Git Bash 路径 $gitBashPath" -ForegroundColor Red
-    Write-Host "请确保 Git for Windows 已正确安装，并且 bash.exe 在 Git 安装目录中" -ForegroundColor Yellow
+    Write-Host "❌ 错误：无法找到 Git Bash 路径 $gitBashPath" -ForegroundColor Red
+    Write-Host "📦 请确保 Git for Windows 已正确安装，并且 bash.exe 在 Git 安装目录中" -ForegroundColor Yellow
     exit 1
 }
 
@@ -49,32 +51,26 @@ $downloadedFileName = "WinGit_zh-CN.sh"
 $tempDir = $env:TEMP
 $downloadedFilePath = Join-Path -Path $tempDir -ChildPath $downloadedFileName
 
-Write-Host "正在从 URL 下载脚本: $scriptUrl" -ForegroundColor Cyan
-Write-Host "保存到临时路径: $downloadedFilePath“ -ForegroundColor Cyan
+Write-Host "⬇️ 正在从 URL🔗 下载脚本: $scriptUrl" -ForegroundColor Cyan
+Write-Host "📂 保存到临时路径: $downloadedFilePath“ -ForegroundColor Cyan
 try {
     Invoke-WebRequest -Uri $scriptUrl -OutFile $downloadedFilePath -UseBasicParsing
     
     if (Test-Path $downloadedFilePath) {
-        Write-Host "脚本已成功下载到: $downloadedFilePath" -ForegroundColor Green
+        Write-Host "📄 脚本已成功下载到: $downloadedFilePath" -ForegroundColor Green
     } else {
-        throw "下载失败，文件未找到"
+        throw "⛓️‍💥 下载失败：文件未找到"
     }
 } catch {
-    Write-Host "下载过程中出错: $_" -ForegroundColor Red
+    Write-Host "❌ 下载过程中出错: $_" -ForegroundColor Red
     exit 1
 }
 
 # 3. 执行脚本
 
-Write-Host "正在执行 Git Bash 安装 Git 中文语言包 bash 脚本..." -ForegroundColor Cyan
+Write-Host "🪜 正在执行 Git Bash 安装 Git 中文语言包 bash 脚本..." -ForegroundColor Cyan
 # 启动 bash.exe 进程，指定要运行的脚本文件，并设置工作目录
 Start-Process -FilePath $gitBashPath -ArgumentList "`"$downloadedFileName`"" -WorkingDirectory $tempDir -NoNewWindow -Wait
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Git Bash 安装 Git 中文语言包 bash 脚本执行成功！" -ForegroundColor Green
-} else {
-    Write-Host "❌ Git Bash 安装 Git 中文语言包 bash 脚本执行失败！$LASTEXITCODE" -ForegroundColor Red
-}
 
 # 4. 脚本执行完成后清除下载的文件
 Remove-Item $downloadedFilePath
-
