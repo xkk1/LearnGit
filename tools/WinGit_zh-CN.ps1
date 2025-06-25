@@ -9,7 +9,7 @@
 
 Write-Host "🔧 小喾苦 Git for Windows 语言包自动安装 PowerShell 脚本" -ForegroundColor Green
 
-# 检测是否以管理员身份运行
+# 0. 检测是否以管理员身份运行
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "❌ 错误：此脚本需要以管理员权限运行！" -ForegroundColor Red
     Write-Host "🖱️ 请右键点击 PowerShell 图标，选择 '以管理员身份运行' 后重试。" -ForegroundColor Yellow
@@ -43,7 +43,16 @@ try {
     exit 1
 }
 
-# 2. 下载 WinGit_zh-CN.sh 到临时文件夹
+# 2. 设置环境变量
+$lang = "zh_CN"  # 定义基础语言代码变量（可修改为其他值，如 "zh_TW"）
+# 2. 构造完整环境变量值
+$langEnvValue = "$lang.UTF-8"
+Write-Host "🌐 当前语言设置: $lang" -ForegroundColor Cyan
+# 设置环境变量 LANG
+$env:LANG = "$langEnvValue.UTF-8"
+[Environment]::SetEnvironmentVariable("LANG", $langEnvValue, [EnvironmentVariableTarget]::User)
+
+# 3. 下载 WinGit_zh-CN.sh 到临时文件夹
 $scriptUrl = "https://github.com/xkk1/LearnGit/raw/refs/heads/gitee/tools/WinGit_zh-CN.sh"
 $downloadedFileName = "WinGit_zh-CN.sh"
 
@@ -66,11 +75,9 @@ try {
     exit 1
 }
 
-# 3. 执行脚本
-
+# 4. 执行脚本
 Write-Host "🪜 正在执行 Git Bash 安装 Git 中文语言包 bash 脚本..." -ForegroundColor Cyan
 # 启动 bash.exe 进程，指定要运行的脚本文件，并设置工作目录
 Start-Process -FilePath $gitBashPath -ArgumentList "`"$downloadedFileName`"" -WorkingDirectory $tempDir -NoNewWindow -Wait
-
-# 4. 脚本执行完成后清除下载的文件
+# 清理文件
 Remove-Item $downloadedFilePath
