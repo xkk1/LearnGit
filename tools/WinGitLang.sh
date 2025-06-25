@@ -9,21 +9,31 @@
 echo "🔧 小喾苦 Git for Windows 语言包安装 Bash 脚本"
 
 # -------------------------- 语言包下载 --------------------------
-SET_LANG="zh_CN"
-echo "🌐 语言包：$SET_LANG"
-LANG_FILE="$SET_LANG.po"
-LANG_FILE_URL="https://github.com/git-for-windows/git/raw/refs/heads/main/po/$LANG_FILE"
-echo "⬇️ 正在下载语言包： $LANG_FILE"
-echo "🔗 下载链接：$LANG_FILE_URL"
-# wget LANG_FILE_URL -O zh_CN.po
+# 语言默认简体中文
+if [ -z "${language}" ]; then
+    language="zh_CN"
+fi
+# 命令行参数的第一个参数设置语言
+if [ ! -z "$1" ]; then
+    language=$1
+    echo "🌐 指定语言：$language"
+else
+    echo "🌐 默认语言：$language"
+fi
+# 构造语言包文件名、下载链接
+language_file="$language.po"
+language_file_URL="https://github.com/git-for-windows/git/raw/refs/heads/main/po/$language_file"
+echo "⬇️ 正在下载语言包： $language_file"
+echo "🔗 下载链接：$language_file_URL"
+# wget language_file_URL -O zh_CN.po
 # 使用curl下载（更适合Windows环境）
-curl -L -o $LANG_FILE $LANG_FILE_URL
+curl -L -o $language_file $language_file_URL
 # 下载结果校验
-if [ $? -ne 0 ] || [ ! -s "$LANG_FILE" ]; then
+if [ $? -ne 0 ] || [ ! -s "$language_file" ]; then
     echo "❌ 下载失败：网络问题或文件损坏"
     exit 1
 fi
-echo "✅ 语言包下载完成（$(du -h "$LANG_FILE" | awk '{print $1}')）"
+echo "✅ 语言包下载完成（$(du -h "$language_file" | awk '{print $1}')）"
 
 
 # -------------------------- 环境检查 --------------------------
@@ -43,8 +53,8 @@ if ! command -v msgfmt &>/dev/null; then
 fi
 
 # -------------------------- 生成MO文件 --------------------------
-echo -e "🔄 正在生成二进制语言包（msgfmt -o git.mo \"$LANG_FILE\"）..."
-if ! msgfmt -o git.mo "$LANG_FILE"; then
+echo -e "🔄 正在生成二进制语言包（msgfmt -o git.mo \"$language_file\"）..."
+if ! msgfmt -o git.mo "$language_file"; then
     echo "❌ 生成失败：语言包格式错误或 msgfmt 异常"
     exit 1
 fi
@@ -55,33 +65,33 @@ fi
 echo "✅ MO 文件生成成功：git.mo $(ls -lh git.mo | awk '{print $5}')"
 
 # -------------------------- 部署到系统目录 --------------------------
-LC_MESSAGES_DIR="/mingw64/share/locale/$SET_LANG/LC_MESSAGES"
-LC_MESSAGES_FILE="$LC_MESSAGES_DIR/git.mo"
+LC_MESSAGES_dir="/mingw64/share/locale/$language/LC_MESSAGES"
+LC_MESSAGES_file="$LC_MESSAGES_dir/git.mo"
 
 # 检查目录是否存在
-echo "📂 正在检查目录是否存在：${LC_MESSAGES_DIR}"
-if [ ! -d "$LC_MESSAGES_DIR" ]; then
+echo "📂 正在检查目录是否存在：${LC_MESSAGES_dir}"
+if [ ! -d "$LC_MESSAGES_dir" ]; then
     # 创建多级目录（-p自动创建缺失父目录）
-    echo -e "⚠️ 目录不存在，正在创建目录：mkdir -vp \"${LC_MESSAGES_DIR}\""
-    mkdir -vp "$LC_MESSAGES_DIR"
+    echo -e "⚠️ 目录不存在，正在创建目录：mkdir -vp \"${LC_MESSAGES_dir}\""
+    mkdir -vp "$LC_MESSAGES_dir"
     if [ $? -ne 0 ]; then
-        echo "❌ 创建目录失败，请检查是否有权限：${LC_MESSAGES_DIR}"
+        echo "❌ 创建目录失败，请检查是否有权限：${LC_MESSAGES_dir}"
         exit 1
     fi
-    echo "✅ 目录创建成功：${LC_MESSAGES_DIR}"
+    echo "✅ 目录创建成功：${LC_MESSAGES_dir}"
 fi
 
 # 复制文件并校验
-echo "📦 正在复制 git.mo 到 ${LC_MESSAGES_FILE} ..."
-if ! cp -v git.mo "$LC_MESSAGES_FILE"; then
+echo "📦 正在复制 git.mo 到 ${LC_MESSAGES_file} ..."
+if ! cp -v git.mo "$LC_MESSAGES_file"; then
     echo "❌ 复制失败：目标目录无写入权限或路径错误"
     exit 1
 fi
 
 # -------------------------- 安装完成提示 --------------------------
-echo -e "\n🎉 Git for Windows 语言包 $SET_LANG 安装成功！"
-echo "📄 语言包文件：$(realpath "$LC_MESSAGES_FILE")"
+echo -e "\n🎉 Git for Windows 语言包 $language_file 安装成功！"
+echo "📄 语言包文件：$(realpath "$LC_MESSAGES_file")"
 
 # -------------------------- 清理文件并退出 --------------------------
-rm -f git.mo "$LANG_FILE"
+rm -f git.mo "$language_file"
 exit 0
